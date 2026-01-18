@@ -38,6 +38,7 @@ const themes = {
     inputBorder: '#444',
     codeBg: '#374151',
     codeBlockBg: '#1f2937',
+    tableBorderColor: '#444',
   },
   light: {
     bg: '#ffffff',
@@ -50,6 +51,7 @@ const themes = {
     inputBorder: '#d1d5db',
     codeBg: '#e5e7eb',
     codeBlockBg: '#f3f4f6',
+    tableBorderColor: '#d1d5db',
   },
 };
 
@@ -57,12 +59,69 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
-function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg: string }): React.ReactNode {
+function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg: string; tableBorderColor: string }): React.ReactNode {
   if (!text) return null;
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
   let codeContent: string[] = [];
+  let inTable = false;
+  let tableRows: string[][] = [];
+  let isHeaderRow = true;
+
+  const parseTableRow = (line: string): string[] => {
+    return line.split('|').map(cell => cell.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1 || (arr.length === 2 && idx === 0));
+  };
+
+  const isTableSeparator = (line: string): boolean => {
+    return /^\|?[\s-:|]+\|?$/.test(line) && line.includes('-');
+  };
+
+  const renderTable = (rows: string[][], key: number): React.ReactNode => {
+    if (rows.length === 0) return null;
+    const headerRow = rows[0];
+    const bodyRows = rows.slice(1);
+    
+    return (
+      <table key={key} style={{ 
+        borderCollapse: 'collapse', 
+        width: '100%', 
+        margin: '8px 0', 
+        fontSize: '13px',
+        border: `1px solid ${themeColors.tableBorderColor}`,
+      }}>
+        <thead>
+          <tr>
+            {headerRow.map((cell, idx) => (
+              <th key={idx} style={{ 
+                border: `1px solid ${themeColors.tableBorderColor}`, 
+                padding: '8px', 
+                textAlign: 'left',
+                fontWeight: 600,
+                backgroundColor: themeColors.codeBlockBg,
+              }}>
+                {processInline(cell)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {bodyRows.map((row, rowIdx) => (
+            <tr key={rowIdx}>
+              {row.map((cell, cellIdx) => (
+                <td key={cellIdx} style={{ 
+                  border: `1px solid ${themeColors.tableBorderColor}`, 
+                  padding: '8px',
+                }}>
+                  {processInline(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
   const processInline = (line: string): React.ReactNode => {
     const parts: React.ReactNode[] = [];
@@ -73,11 +132,13 @@ function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg
       const codeMatch = remaining.match(/`([^`]+)`/);
       const boldMatch = remaining.match(/\*\*([^*]+)\*\*/);
       const italicMatch = remaining.match(/\*([^*]+)\*/);
+      const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/);
 
       const matches = [
         codeMatch ? { type: 'code', match: codeMatch, index: codeMatch.index! } : null,
         boldMatch ? { type: 'bold', match: boldMatch, index: boldMatch.index! } : null,
         italicMatch ? { type: 'italic', match: italicMatch, index: italicMatch.index! } : null,
+        linkMatch ? { type: 'link', match: linkMatch, index: linkMatch.index! } : null,
       ].filter(Boolean).sort((a, b) => a!.index - b!.index);
 
       if (matches.length === 0) {
@@ -100,6 +161,12 @@ function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg
         parts.push(<strong key={key++}>{first.match![1]}</strong>);
       } else if (first.type === 'italic') {
         parts.push(<em key={key++}>{first.match![1]}</em>);
+      } else if (first.type === 'link') {
+        parts.push(
+          <a key={key++} href={first.match![2]} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+            {first.match![1]}
+          </a>
+        );
       }
 
       remaining = remaining.substring(first.index + first.match![0].length);
@@ -112,6 +179,11 @@ function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg
     const line = lines[i];
 
     if (line.startsWith('```')) {
+      if (inTable) {
+        elements.push(renderTable(tableRows, i - tableRows.length));
+        inTable = false;
+        tableRows = [];
+      }
       if (!inCodeBlock) {
         inCodeBlock = true;
         codeContent = [];
@@ -131,6 +203,26 @@ function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg
       continue;
     }
 
+    // Table handling
+    const isTableRow = line.includes('|') && line.trim().startsWith('|');
+    if (isTableRow) {
+      if (isTableSeparator(line)) {
+        // Skip separator row (e.g., |---|---|)
+        continue;
+      }
+      if (!inTable) {
+        inTable = true;
+        tableRows = [];
+      }
+      tableRows.push(parseTableRow(line));
+      continue;
+    } else if (inTable) {
+      // End of table
+      elements.push(renderTable(tableRows, i - tableRows.length));
+      inTable = false;
+      tableRows = [];
+    }
+
     if (line.startsWith('### ')) {
       elements.push(<h4 key={i} style={{ margin: '12px 0 8px', fontSize: '14px', fontWeight: 600 }}>{processInline(line.slice(4))}</h4>);
     } else if (line.startsWith('## ')) {
@@ -147,6 +239,11 @@ function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg
     } else {
       elements.push(<p key={i} style={{ margin: '4px 0' }}>{processInline(line)}</p>);
     }
+  }
+
+  // Handle unclosed table at end
+  if (inTable && tableRows.length > 0) {
+    elements.push(renderTable(tableRows, lines.length));
   }
 
   if (inCodeBlock && codeContent.length > 0) {
@@ -184,6 +281,7 @@ export function MnexiumChat({
   const [isStreaming, setIsStreaming] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatSize, setChatSize] = useState<'small' | 'medium' | 'large'>('medium');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -414,8 +512,8 @@ export function MnexiumChat({
           <div style={{
             position: 'absolute',
             ...chatPositionStyles,
-            width: '380px',
-            height: '500px',
+            width: chatSize === 'small' ? '320px' : chatSize === 'large' ? '547px' : '380px',
+            height: chatSize === 'small' ? '400px' : chatSize === 'large' ? '600px' : '500px',
             backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.9)' : 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(8px) saturate(180%)',
             WebkitBackdropFilter: 'blur(16px) saturate(180%)',
@@ -428,6 +526,7 @@ export function MnexiumChat({
             animation: 'mnx-fade-in 0.2s ease-out',
             transform: 'translateZ(0)',
             isolation: 'isolate',
+            transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           }}>
             <div style={{
               display: 'flex',
@@ -479,6 +578,40 @@ export function MnexiumChat({
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setChatSize(prev => prev === 'small' ? 'medium' : prev === 'medium' ? 'large' : 'small')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: t.textMuted,
+                    cursor: 'pointer',
+                    padding: '6px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.2s ease',
+                  }}
+                  title={`Size: ${chatSize}`}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {chatSize === 'small' ? (
+                      <>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <polyline points="9 21 3 21 3 15"/>
+                      </>
+                    ) : chatSize === 'large' ? (
+                      <>
+                        <polyline points="4 14 4 20 10 20"/>
+                        <polyline points="20 10 20 4 14 4"/>
+                      </>
+                    ) : (
+                      <>
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                      </>
+                    )}
                   </svg>
                 </button>
                 <button
@@ -554,7 +687,7 @@ export function MnexiumChat({
                     ),
                   }}
                 >
-                  {message.role === 'assistant' ? renderMarkdown(message.content, { codeBg: t.codeBg, codeBlockBg: t.codeBlockBg }) : message.content}
+                  {message.role === 'assistant' ? renderMarkdown(message.content, { codeBg: t.codeBg, codeBlockBg: t.codeBlockBg, tableBorderColor: t.tableBorderColor }) : message.content}
                 </div>
               ))}
               {isLoading && (
