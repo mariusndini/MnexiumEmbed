@@ -18,13 +18,41 @@ export interface MnexiumChatProps {
   primaryColor?: string;
   defaultOpen?: boolean;
   logo?: string;
+  theme?: 'light' | 'dark';
 }
+
+const themes = {
+  dark: {
+    bg: '#1a1a1a',
+    bgSecondary: '#2a2a2a',
+    border: '#333',
+    text: '#fff',
+    textSecondary: '#e5e5e5',
+    textMuted: '#888',
+    inputBg: '#2a2a2a',
+    inputBorder: '#444',
+    codeBg: '#374151',
+    codeBlockBg: '#1f2937',
+  },
+  light: {
+    bg: '#ffffff',
+    bgSecondary: '#f3f4f6',
+    border: '#e5e7eb',
+    text: '#111827',
+    textSecondary: '#374151',
+    textMuted: '#6b7280',
+    inputBg: '#f9fafb',
+    inputBorder: '#d1d5db',
+    codeBg: '#e5e7eb',
+    codeBlockBg: '#f3f4f6',
+  },
+};
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
-function renderMarkdown(text: string): React.ReactNode {
+function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg: string }): React.ReactNode {
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
@@ -58,7 +86,7 @@ function renderMarkdown(text: string): React.ReactNode {
 
       if (first.type === 'code') {
         parts.push(
-          <code key={key++} style={{ backgroundColor: '#374151', padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>
+          <code key={key++} style={{ backgroundColor: themeColors.codeBg, padding: '2px 6px', borderRadius: '4px', fontSize: '13px' }}>
             {first.match![1]}
           </code>
         );
@@ -83,7 +111,7 @@ function renderMarkdown(text: string): React.ReactNode {
         codeContent = [];
       } else {
         elements.push(
-          <pre key={i} style={{ backgroundColor: '#1f2937', color: '#f9fafb', padding: '12px', borderRadius: '8px', overflow: 'auto', fontSize: '13px', margin: '8px 0' }}>
+          <pre key={i} style={{ backgroundColor: themeColors.codeBlockBg, padding: '12px', borderRadius: '8px', overflow: 'auto', fontSize: '13px', margin: '8px 0' }}>
             <code>{codeContent.join('\n')}</code>
           </pre>
         );
@@ -117,7 +145,7 @@ function renderMarkdown(text: string): React.ReactNode {
 
   if (inCodeBlock && codeContent.length > 0) {
     elements.push(
-      <pre key="final-code" style={{ backgroundColor: '#1f2937', color: '#f9fafb', padding: '12px', borderRadius: '8px', overflow: 'auto', fontSize: '13px', margin: '8px 0' }}>
+      <pre key="final-code" style={{ backgroundColor: themeColors.codeBlockBg, padding: '12px', borderRadius: '8px', overflow: 'auto', fontSize: '13px', margin: '8px 0' }}>
         <code>{codeContent.join('\n')}</code>
       </pre>
     );
@@ -135,7 +163,9 @@ export function MnexiumChat({
   primaryColor = '#facc15',
   defaultOpen = false,
   logo,
+  theme = 'dark',
 }: MnexiumChatProps) {
+  const t = themes[theme];
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -348,9 +378,9 @@ export function MnexiumChat({
             ...chatPositionStyles,
             width: '380px',
             height: '500px',
-            backgroundColor: '#1a1a1a',
+            backgroundColor: t.bg,
             borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            boxShadow: theme === 'dark' ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -361,7 +391,7 @@ export function MnexiumChat({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px 20px',
-              borderBottom: '1px solid #333',
+              borderBottom: `1px solid ${t.border}`,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
@@ -372,21 +402,26 @@ export function MnexiumChat({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  overflow: 'hidden',
                 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                    <path d="M2 17l10 5 10-5"/>
-                    <path d="M2 12l10 5 10-5"/>
-                  </svg>
+                  {logo ? (
+                    <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                      <path d="M2 17l10 5 10-5"/>
+                      <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                  )}
                 </div>
-                <span style={{ color: '#fff', fontWeight: 600, fontSize: '15px' }}>{title}</span>
+                <span style={{ color: t.text, fontWeight: 600, fontSize: '15px' }}>{title}</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#888',
+                  color: t.textMuted,
                   cursor: 'pointer',
                   padding: '4px',
                   display: 'flex',
@@ -410,7 +445,7 @@ export function MnexiumChat({
               gap: '12px',
             }}>
               {!isInitialized && !error && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: t.textMuted }}>
                   Initializing...
                 </div>
               )}
@@ -420,7 +455,7 @@ export function MnexiumChat({
                 </div>
               )}
               {isInitialized && messages.length === 0 && !error && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666', textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: t.textMuted, textAlign: 'center' }}>
                   <div>
                     <div style={{ fontSize: '24px', marginBottom: '8px' }}>👋</div>
                     <div>How can I help you today?</div>
@@ -446,14 +481,14 @@ export function MnexiumChat({
                         }
                       : {
                           alignSelf: 'flex-start',
-                          backgroundColor: '#2a2a2a',
-                          color: '#e5e5e5',
+                          backgroundColor: t.bgSecondary,
+                          color: t.textSecondary,
                           borderBottomLeftRadius: '4px',
                         }
                     ),
                   }}
                 >
-                  {message.role === 'assistant' ? renderMarkdown(message.content) : message.content}
+                  {message.role === 'assistant' ? renderMarkdown(message.content, { codeBg: t.codeBg, codeBlockBg: t.codeBlockBg }) : message.content}
                 </div>
               ))}
               {isLoading && (
@@ -462,13 +497,13 @@ export function MnexiumChat({
                   gap: '4px',
                   padding: '10px 14px',
                   alignSelf: 'flex-start',
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: t.bgSecondary,
                   borderRadius: '12px',
                   borderBottomLeftRadius: '4px',
                 }}>
-                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#666', borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
-                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#666', borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
-                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#666', borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
+                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: t.textMuted, borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
+                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: t.textMuted, borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
+                  <div className="mnx-typing-dot" style={{ width: '6px', height: '6px', backgroundColor: t.textMuted, borderRadius: '50%', animation: 'mnx-typing 1.4s infinite ease-in-out' }} />
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -478,7 +513,7 @@ export function MnexiumChat({
               display: 'flex',
               gap: '8px',
               padding: '16px 20px',
-              borderTop: '1px solid #333',
+              borderTop: `1px solid ${t.border}`,
             }}>
               <input
                 ref={inputRef}
@@ -491,11 +526,11 @@ export function MnexiumChat({
                 style={{
                   flex: 1,
                   padding: '10px 14px',
-                  backgroundColor: '#2a2a2a',
-                  border: '1px solid #444',
+                  backgroundColor: t.inputBg,
+                  border: `1px solid ${t.inputBorder}`,
                   borderRadius: '8px',
                   fontSize: '14px',
-                  color: '#fff',
+                  color: t.text,
                   outline: 'none',
                 }}
               />
@@ -504,7 +539,7 @@ export function MnexiumChat({
                 disabled={!isInitialized || !input.trim() || isLoading || isStreaming}
                 style={{
                   padding: '10px 16px',
-                  backgroundColor: !isInitialized || !input.trim() || isLoading || isStreaming ? '#444' : primaryColor,
+                  backgroundColor: !isInitialized || !input.trim() || isLoading || isStreaming ? t.inputBorder : primaryColor,
                   color: '#000',
                   border: 'none',
                   borderRadius: '8px',
