@@ -2,11 +2,14 @@
 
 A drop-in React chat widget that gives any web app a full AI chat experience backed by [Mnexium](https://mnexium.com).
 
+![Mnexium Chat Demo](img/embed.png)
+
 ## Features
 
 - **Floating Widget** - Modern glassmorphism design with smooth animations
 - **Persistent Memory** - Conversations and user context persist across sessions
 - **Streaming Responses** - Real-time streaming with typing effect
+- **Multi-Provider Support** - Works with OpenAI, Anthropic Claude, and Google Gemini
 - **Markdown Rendering** - Rich formatting for assistant messages
 - **Zero Client-Side Keys** - All API keys stay on your server
 - **Theming** - Light and dark themes with customizable primary color
@@ -48,7 +51,7 @@ Create a shared configuration file to avoid repeating options across routes:
 import { createHandlers } from '@mnexium/chat-react/server';
 
 export const mnx = createHandlers({
-  model: process.env.MNX_MODEL ?? 'gpt-4o-mini',
+  model: process.env.MODEL ?? 'gpt-4o-mini',
   cookiePrefix: 'mnx',
   mnxOptions: {
     history: true,
@@ -109,12 +112,15 @@ export async function GET(
 # .env.local
 MNX_API_KEY=mnx_live_...
 
-# At least one provider key:
+# Include one or all of the following provider keys:
 OPENAI_API_KEY=sk-...
-# or
 ANTHROPIC_API_KEY=sk-ant-...
-# or
 GOOGLE_API_KEY=...
+
+# Optionally set the model (defaults to gpt-4o-mini)
+# MODEL=gpt-4o-mini
+# MODEL=claude-3-haiku-20240307
+# MODEL=gemini-2.0-flash-lite
 ```
 
 ## Component Props
