@@ -402,13 +402,18 @@ export function MnexiumChat({
             ...chatPositionStyles,
             width: '380px',
             height: '500px',
-            backgroundColor: t.bg,
+            backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(8px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
             borderRadius: '16px',
+            border: `1px solid ${primaryColor}33`,
             boxShadow: theme === 'dark' ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
             animation: 'mnx-fade-in 0.2s ease-out',
+            transform: 'translateZ(0)',
+            isolation: 'isolate',
           }}>
             <div style={{
               display: 'flex',
@@ -416,6 +421,7 @@ export function MnexiumChat({
               justifyContent: 'space-between',
               padding: '8px 8px',
               borderBottom: `1px solid ${t.border}`,
+              backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.7)' : 'rgba(255, 255, 255, 0.7)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
@@ -521,13 +527,13 @@ export function MnexiumChat({
                     ...(message.role === 'user' 
                       ? { 
                           alignSelf: 'flex-end',
-                          backgroundColor: primaryColor,
+                          backgroundColor: `${primaryColor}cc`,
                           color: '#000',
                           borderBottomRightRadius: '4px',
                         }
                       : {
                           alignSelf: 'flex-start',
-                          backgroundColor: t.bgSecondary,
+                          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 42, 0.7)' : 'rgba(243, 244, 246, 0.7)',
                           color: t.textSecondary,
                           borderBottomLeftRadius: '4px',
                         }
@@ -543,7 +549,7 @@ export function MnexiumChat({
                   gap: '4px',
                   padding: '10px 14px',
                   alignSelf: 'flex-start',
-                  backgroundColor: t.bgSecondary,
+                  backgroundColor: theme === 'dark' ? 'rgba(42, 42, 42, 0.7)' : 'rgba(243, 244, 246, 0.7)',
                   borderRadius: '12px',
                   borderBottomLeftRadius: '4px',
                 }}>
@@ -560,6 +566,7 @@ export function MnexiumChat({
               gap: '8px',
               padding: '8px 8px',
               borderTop: `1px solid ${t.border}`,
+              backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.5)' : 'rgba(255, 255, 255, 0.5)',
             }}>
               <input
                 ref={inputRef}
@@ -572,7 +579,7 @@ export function MnexiumChat({
                 style={{
                   flex: 1,
                   padding: '10px 14px',
-                  backgroundColor: t.inputBg,
+                  backgroundColor: theme === 'dark' ? 'rgba(42, 42, 42, 0.6)' : 'rgba(249, 250, 251, 0.6)',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
