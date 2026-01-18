@@ -16,6 +16,7 @@ export interface MnexiumChatProps {
   buttonLabel?: string;
   position?: 'bottom-right' | 'bottom-left';
   primaryColor?: string;
+  textColor?: string;
   defaultOpen?: boolean;
   logo?: string;
   theme?: 'light' | 'dark';
@@ -166,6 +167,7 @@ export function MnexiumChat({
   buttonLabel = 'Ask AI',
   position = 'bottom-right',
   primaryColor = '#facc15',
+  textColor = '#000',
   defaultOpen = false,
   logo,
   theme = 'dark',
@@ -400,9 +402,6 @@ export function MnexiumChat({
         .mnx-btn-icon {
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .mnx-btn-icon.open {
-          transform: rotate(45deg);
-        }
       `}</style>
 
       <div style={{
@@ -543,7 +542,7 @@ export function MnexiumChat({
                       ? { 
                           alignSelf: 'flex-end',
                           backgroundColor: `${primaryColor}cc`,
-                          color: '#000',
+                          color: textColor,
                           borderBottomRightRadius: '4px',
                         }
                       : {
@@ -643,7 +642,7 @@ export function MnexiumChat({
             gap: '8px',
             padding: '12px 16px',
             backgroundColor: primaryColor,
-            color: '#000',
+            color: textColor,
             border: 'none',
             borderRadius: '12px',
             fontSize: '14px',
@@ -681,11 +680,32 @@ export function MnexiumChat({
             )}
           </span>
           <span style={{ 
-            transition: 'opacity 0.2s, width 0.3s',
+            display: 'inline-flex',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
+            position: 'relative',
+            height: '1.2em',
+            alignItems: 'center',
           }}>
-            {isOpen ? 'Close' : buttonLabel}
+            <span style={{
+              display: 'inline-block',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isOpen ? 'translateY(-100%)' : 'translateY(0)',
+              opacity: isOpen ? 0 : 1,
+              maxWidth: isOpen ? '0' : '300px',
+            }}>
+              {buttonLabel}
+            </span>
+            <span style={{
+              display: 'inline-block',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+              opacity: isOpen ? 1 : 0,
+              maxWidth: isOpen ? '50px' : '0',
+              overflow: 'hidden',
+            }}>
+              Close
+            </span>
           </span>
         </button>
       </div>

@@ -133,6 +133,7 @@ GOOGLE_API_KEY=...
 | `placeholder` | `string` | `'Type a message...'` | Input placeholder |
 | `position` | `'bottom-right' \| 'bottom-left'` | `'bottom-right'` | Widget position |
 | `primaryColor` | `string` | `'#facc15'` | Accent color (use 6-char hex, e.g. `#45b1eb`) |
+| `textColor` | `string` | `'#000'` | Text color for button and user messages |
 | `theme` | `'light' \| 'dark'` | `'dark'` | Color theme |
 | `defaultOpen` | `boolean` | `false` | Start with chat open |
 | `eagerInit` | `boolean` | `true` | Initialize on page load (no "Initializing..." delay) |
@@ -231,6 +232,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           buttonLabel="Ask AI"
           position="bottom-right"
           primaryColor="#45b1eb"
+          textColor="#fff"
           theme="dark"
           logo="/logo.png"
           welcomeIcon="🤖"

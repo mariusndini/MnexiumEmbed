@@ -17,9 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MnexiumChat 
           endpoint="/api/mnx" 
           title="Ask AI"
-          buttonLabel="Ask AI"
+          buttonLabel="Ask & chat with our AI"
           position="bottom-right"
           primaryColor="#45b1eb"
+          textColor="#fff"
           theme="dark"
           logo="/logo.png"
  
