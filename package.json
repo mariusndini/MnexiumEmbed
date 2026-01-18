@@ -42,18 +42,29 @@
   "keywords": [
     "react",
     "chat",
+    "chatbot",
     "ai",
     "mnexium",
     "memory",
     "llm",
     "openai",
     "anthropic",
-    "gemini"
+    "gemini",
+    "gpt",
+    "claude",
+    "widget",
+    "embed",
+    "streaming",
+    "nextjs"
   ],
   "author": "Mnexium",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mnexium/chat-react"
+    "url": "https://github.com/mariusndini/MnexiumEmbed"
+  },
+  "homepage": "https://mnexium.com",
+  "bugs": {
+    "url": "https://github.com/mariusndini/MnexiumEmbed/issues"
   }
 }

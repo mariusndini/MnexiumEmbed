@@ -4,11 +4,13 @@ A drop-in React chat widget that gives any web app a full AI chat experience bac
 
 ## Features
 
-- **Floating Widget** - Minimal button that expands into a chat popup
+- **Floating Widget** - Modern glassmorphism design with smooth animations
 - **Persistent Memory** - Conversations and user context persist across sessions
 - **Streaming Responses** - Real-time streaming with typing effect
 - **Markdown Rendering** - Rich formatting for assistant messages
 - **Zero Client-Side Keys** - All API keys stay on your server
+- **Theming** - Light and dark themes with customizable primary color
+- **Eager Initialization** - Pre-loads on page load for instant chat opening
 - **Framework Agnostic** - Works with Next.js, Vite, CRA, and any React app
 
 ## Installation
@@ -36,36 +38,68 @@ export default function Layout({ children }) {
 
 This adds a floating "Ask AI" button to the bottom-right of your page. Click it to open the chat.
 
-### 2. Set Up Server Routes
+### 2. Set Up Server Routes (Recommended Pattern)
 
-#### Next.js App Router
+Create a shared configuration file to avoid repeating options across routes:
+
+**`app/api/mnx/_mnx.ts`**
+
+```ts
+import { createHandlers } from '@mnexium/chat-react/server';
+
+export const mnx = createHandlers({
+  model: process.env.MNX_MODEL ?? 'gpt-4o-mini',
+  cookiePrefix: 'mnx',
+  mnxOptions: {
+    history: true,
+    learn: true,
+    recall: true,
+    profile: true,
+    summarize: 'balanced',
+  },
+});
+```
+
+Then create simple route files:
 
 **`app/api/mnx/bootstrap/route.ts`**
 
 ```ts
-import { bootstrapHandler } from '@mnexium/chat-react/server';
-
-export async function GET(req: Request) {
-  return bootstrapHandler(req);
-}
+import { mnx } from '../_mnx';
+export const GET = mnx.bootstrap;
 ```
 
 **`app/api/mnx/chat/route.ts`**
 
 ```ts
-import { chatHandler } from '@mnexium/chat-react/server';
+import { mnx } from '../_mnx';
+export const POST = mnx.chat;
+```
 
-export async function POST(req: Request) {
-  return chatHandler(req, {
-    model: 'gpt-4o-mini',
-    mnxOptions: {
-      history: true,
-      learn: true,
-      recall: true,
-      profile: true,
-      summarize: 'balanced',
-    },
-  });
+**`app/api/mnx/new-chat/route.ts`** (optional)
+
+```ts
+import { mnx } from '../_mnx';
+export const POST = mnx.newChat;
+```
+
+**`app/api/mnx/history/route.ts`** (optional)
+
+```ts
+import { mnx } from '../_mnx';
+export const GET = mnx.history;
+```
+
+**`app/api/mnx/conversations/[chatId]/route.ts`** (optional)
+
+```ts
+import { mnx } from '../../_mnx';
+
+export async function GET(
+  req: Request,
+  { params }: { params: { chatId: string } }
+) {
+  return mnx.conversation(req, params.chatId);
 }
 ```
 
@@ -92,18 +126,30 @@ GOOGLE_API_KEY=...
 | `buttonLabel` | `string` | `'Ask AI'` | Floating button label |
 | `placeholder` | `string` | `'Type a message...'` | Input placeholder |
 | `position` | `'bottom-right' \| 'bottom-left'` | `'bottom-right'` | Widget position |
-| `primaryColor` | `string` | `'#facc15'` | Accent color (button, user messages) |
+| `primaryColor` | `string` | `'#facc15'` | Accent color (use 6-char hex, e.g. `#45b1eb`) |
+| `theme` | `'light' \| 'dark'` | `'dark'` | Color theme |
 | `defaultOpen` | `boolean` | `false` | Start with chat open |
+| `eagerInit` | `boolean` | `true` | Initialize on page load (no "Initializing..." delay) |
+| `logo` | `string` | - | URL to custom logo image |
+| `welcomeIcon` | `string` | `'👋'` | Emoji shown in empty chat |
+| `welcomeMessage` | `string` | `'How can I help you today?'` | Welcome message |
+| `history` | `boolean` | `false` | Load previous conversation on open |
 
 ## Server Handler Options
 
-### `bootstrapHandler(req, options?)`
+### `createHandlers(config)` (Recommended)
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `cookiePrefix` | `string` | `'mnx'` | Prefix for session cookies |
+Creates all handlers with shared configuration:
 
-### `chatHandler(req, options?)`
+```ts
+const mnx = createHandlers({
+  model: 'gpt-4o-mini',
+  cookiePrefix: 'mnx',
+  mnxOptions: { ... },
+});
+
+// Returns: { bootstrap, chat, newChat, history, conversation }
+```
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -114,6 +160,14 @@ GOOGLE_API_KEY=...
 | `mnxOptions.recall` | `boolean` | `true` | Inject relevant memories |
 | `mnxOptions.profile` | `boolean` | `true` | Include user profile |
 | `mnxOptions.summarize` | `'light' \| 'balanced' \| 'aggressive' \| false` | `'balanced'` | Summarization mode |
+
+### Individual Handlers
+
+You can also import handlers individually:
+
+```ts
+import { bootstrapHandler, chatHandler, newChatHandler, historyHandler, conversationHandler } from '@mnexium/chat-react/server';
+```
 
 ## Supported Models
 
@@ -140,10 +194,18 @@ All API keys remain server-side. The client never sees or constructs Mnexium req
 app/
 ├── api/
 │   └── mnx/
+│       ├── _mnx.ts           # Shared config
 │       ├── bootstrap/
 │       │   └── route.ts
-│       └── chat/
-│           └── route.ts
+│       ├── chat/
+│       │   └── route.ts
+│       ├── new-chat/
+│       │   └── route.ts
+│       ├── history/
+│       │   └── route.ts
+│       └── conversations/
+│           └── [chatId]/
+│               └── route.ts
 └── layout.tsx
 ```
 
@@ -162,7 +224,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           title="Ask AI"
           buttonLabel="Ask AI"
           position="bottom-right"
-          primaryColor="#facc15"
+          primaryColor="#45b1eb"
+          theme="dark"
+          logo="/logo.png"
+          welcomeIcon="🤖"
+          welcomeMessage="Ask me anything!"
+          history={true}
         />
       </body>
     </html>
@@ -170,7 +237,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-The widget appears as a floating button on every page. Users click to open the chat popup.
+The widget appears as a floating button on every page. Click to open the chat with smooth animations.
 
 ## License
 

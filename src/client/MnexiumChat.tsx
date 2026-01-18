@@ -385,9 +385,24 @@ export function MnexiumChat({
           from { opacity: 0; transform: translateY(10px) scale(0.95); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes mnx-fade-out {
+          from { opacity: 1; transform: translateY(0) scale(1); }
+          to { opacity: 0; transform: translateY(10px) scale(0.95); }
+        }
+        @keyframes mnx-pulse {
+          0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+          50% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+          100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        }
         .mnx-typing-dot:nth-child(1) { animation-delay: 0s; }
         .mnx-typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .mnx-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .mnx-btn-icon {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mnx-btn-icon.open {
+          transform: rotate(45deg);
+        }
       `}</style>
 
       <div style={{
@@ -635,27 +650,43 @@ export function MnexiumChat({
             fontWeight: 600,
             cursor: 'pointer',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            transition: 'transform 0.15s, box-shadow 0.15s',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.4)';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'scale(1)';
             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
           }}
         >
-          {logo ? (
-            <img src={logo} alt="" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          )}
-          {buttonLabel}
+          <span 
+            className={`mnx-btn-icon ${isOpen ? 'open' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            {isOpen ? (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            ) : logo ? (
+              <img src={logo} alt="" style={{ height: '28px', width: 'auto', objectFit: 'contain' }} />
+            ) : (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            )}
+          </span>
+          <span style={{ 
+            transition: 'opacity 0.2s, width 0.3s',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+          }}>
+            {isOpen ? 'Close' : buttonLabel}
+          </span>
         </button>
       </div>
     </>
