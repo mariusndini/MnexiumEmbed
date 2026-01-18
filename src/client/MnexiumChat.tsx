@@ -22,6 +22,7 @@ export interface MnexiumChatProps {
   welcomeIcon?: string;
   welcomeMessage?: string;
   history?: boolean;
+  eagerInit?: boolean;
 }
 
 const themes = {
@@ -171,6 +172,7 @@ export function MnexiumChat({
   welcomeIcon = '👋',
   welcomeMessage = 'How can I help you today?',
   history = false,
+  eagerInit = true,
 }: MnexiumChatProps) {
   const t = themes[theme];
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -198,7 +200,7 @@ export function MnexiumChat({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!eagerInit && !isOpen) return;
     
     const bootstrap = async () => {
       if (isInitialized) return;
@@ -236,7 +238,7 @@ export function MnexiumChat({
     };
 
     bootstrap();
-  }, [endpoint, isOpen, isInitialized, history]);
+  }, [endpoint, isOpen, isInitialized, history, eagerInit]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading || isStreaming) return;
@@ -412,7 +414,7 @@ export function MnexiumChat({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '16px 20px',
+              padding: '8px 8px',
               borderBottom: `1px solid ${t.border}`,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -483,7 +485,7 @@ export function MnexiumChat({
             <div style={{
               flex: 1,
               overflowY: 'auto',
-              padding: '16px 20px',
+              padding: '8px 8px',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
@@ -556,7 +558,7 @@ export function MnexiumChat({
             <div style={{
               display: 'flex',
               gap: '8px',
-              padding: '16px 20px',
+              padding: '8px 8px',
               borderTop: `1px solid ${t.border}`,
             }}>
               <input
@@ -571,11 +573,18 @@ export function MnexiumChat({
                   flex: 1,
                   padding: '10px 14px',
                   backgroundColor: t.inputBg,
-                  border: `1px solid ${t.inputBorder}`,
+                  border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
                   color: t.text,
                   outline: 'none',
+                  transition: 'box-shadow 0.15s ease',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.boxShadow = `0 0 0 2px ${primaryColor}`;
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               />
               <button

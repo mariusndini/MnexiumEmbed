@@ -1,5 +1,3 @@
-import { historyHandler } from '@mnexium/chat-react/server';
+import { mnx } from '../_mnx';
 
-export async function GET(req: Request) {
-  return historyHandler(req);
-}
+export const GET = mnx.history;

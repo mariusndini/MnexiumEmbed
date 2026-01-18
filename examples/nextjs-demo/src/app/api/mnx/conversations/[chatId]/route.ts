@@ -1,8 +1,8 @@
-import { conversationHandler } from '@mnexium/chat-react/server';
+import { mnx } from '../../_mnx';
 
 export async function GET(
   req: Request,
   { params }: { params: { chatId: string } }
 ) {
-  return conversationHandler(req, params.chatId);
+  return mnx.conversation(req, params.chatId);
 }

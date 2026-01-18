@@ -1,6 +1,4 @@
-import { bootstrapHandler } from '@mnexium/chat-react/server';
+import { mnx } from '../_mnx';
 
-export async function GET(req: Request) {
-  return bootstrapHandler(req);
-}
+export const GET = mnx.bootstrap;
 

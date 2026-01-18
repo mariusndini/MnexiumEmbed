@@ -126,7 +126,6 @@ export async function conversationHandler(
     }
 
     const data = await res.json();
-    console.log('Mnexium conversation response:', JSON.stringify(data, null, 2));
     
     // Transform Mnexium response - filter to only user and assistant messages
     // The API may return messages directly or nested under a key

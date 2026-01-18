@@ -1,5 +1,3 @@
-import { chatHandler } from '@mnexium/chat-react/server';
+import { mnx } from '../_mnx';
 
-export async function POST(req: Request) {
-  return chatHandler(req);
-}
+export const POST = mnx.chat;

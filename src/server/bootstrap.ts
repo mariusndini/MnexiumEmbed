@@ -110,12 +110,12 @@ export async function bootstrapHandler(
     chat_id: chatId,
   };
 
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-  };
+  });
 
-  if (setCookies.length > 0) {
-    headers['Set-Cookie'] = setCookies.join(', ');
+  for (const cookie of setCookies) {
+    headers.append('Set-Cookie', cookie);
   }
 
   return new Response(JSON.stringify(responseBody), {
@@ -156,10 +156,13 @@ export async function newChatHandler(
     chat_id: chatId,
   };
 
-  const headers: HeadersInit = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
-    'Set-Cookie': setCookies.join(', '),
-  };
+  });
+
+  for (const cookie of setCookies) {
+    headers.append('Set-Cookie', cookie);
+  }
 
   return new Response(JSON.stringify(responseBody), {
     status: 200,
