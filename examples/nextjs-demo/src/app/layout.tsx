@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
  
           welcomeIcon="🤖"
           welcomeMessage="Ask me anything!"
+          history={true}
         />
       </body>
     </html>

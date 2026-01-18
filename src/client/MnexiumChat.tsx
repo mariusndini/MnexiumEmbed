@@ -21,6 +21,7 @@ export interface MnexiumChatProps {
   theme?: 'light' | 'dark';
   welcomeIcon?: string;
   welcomeMessage?: string;
+  history?: boolean;
 }
 
 const themes = {
@@ -55,6 +56,7 @@ function generateId(): string {
 }
 
 function renderMarkdown(text: string, themeColors: { codeBg: string; codeBlockBg: string }): React.ReactNode {
+  if (!text) return null;
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
@@ -168,6 +170,7 @@ export function MnexiumChat({
   theme = 'dark',
   welcomeIcon = '👋',
   welcomeMessage = 'How can I help you today?',
+  history = false,
 }: MnexiumChatProps) {
   const t = themes[theme];
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -206,7 +209,7 @@ export function MnexiumChat({
         
         const data = await res.json();
         
-        if (data.chat_id) {
+        if (history && data.chat_id) {
           try {
             const historyRes = await fetch(`${endpoint}/conversations/${data.chat_id}`);
             if (historyRes.ok) {
@@ -233,7 +236,7 @@ export function MnexiumChat({
     };
 
     bootstrap();
-  }, [endpoint, isOpen, isInitialized]);
+  }, [endpoint, isOpen, isInitialized, history]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading || isStreaming) return;
@@ -349,6 +352,18 @@ export function MnexiumChat({
     }
   };
 
+  const startNewChat = async () => {
+    try {
+      const res = await fetch(`${endpoint}/new-chat`, { method: 'POST' });
+      if (res.ok) {
+        setMessages([]);
+      }
+    } catch {
+      // Fallback: just clear messages locally
+      setMessages([]);
+    }
+  };
+
   const positionStyles = position === 'bottom-right' 
     ? { right: '20px', bottom: '20px' }
     : { left: '20px', bottom: '20px' };
@@ -423,24 +438,46 @@ export function MnexiumChat({
                 </div>
                 <span style={{ color: t.text, fontWeight: 600, fontSize: '15px' }}>{title}</span>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: t.textMuted,
-                  cursor: 'pointer',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <button
+                  onClick={startNewChat}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: t.textMuted,
+                    cursor: 'pointer',
+                    padding: '6px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  title="New chat"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: t.textMuted,
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div style={{

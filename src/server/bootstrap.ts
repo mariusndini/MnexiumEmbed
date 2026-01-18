@@ -124,4 +124,47 @@ export async function bootstrapHandler(
   });
 }
 
+export async function newChatHandler(
+  req: Request,
+  options: BootstrapOptions = {}
+): Promise<Response> {
+  const { cookiePrefix = 'mnx' } = options;
+  const subjectCookieName = `${cookiePrefix}_subject`;
+  const chatCookieName = `${cookiePrefix}_chat`;
+
+  const cookieHeader = req.headers.get('cookie');
+  const cookies = parseCookies(cookieHeader);
+
+  let subjectId = cookies[subjectCookieName];
+  const setCookies: string[] = [];
+
+  const isSecure = req.url.startsWith('https://') || 
+    req.headers.get('x-forwarded-proto') === 'https';
+
+  // Generate subject_id if missing
+  if (!subjectId) {
+    subjectId = generateUUID();
+    setCookies.push(createCookie(subjectCookieName, subjectId, isSecure));
+  }
+
+  // Always generate a new chat_id
+  const chatId = generateUUID();
+  setCookies.push(createCookie(chatCookieName, chatId, isSecure));
+
+  const responseBody: BootstrapResponse = {
+    subject_id: subjectId,
+    chat_id: chatId,
+  };
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Set-Cookie': setCookies.join(', '),
+  };
+
+  return new Response(JSON.stringify(responseBody), {
+    status: 200,
+    headers,
+  });
+}
+
 export default bootstrapHandler;
