@@ -1,3 +1,5 @@
+import { createNormalizerStream } from './providers';
+
 const MNEXIUM_API_BASE = 'https://www.mnexium.com/api/v1';
 
 export interface ChatOptions {
@@ -148,7 +150,10 @@ export async function chatHandler(
     );
   }
 
-  return new Response(upstreamRes.body, {
+  // Normalize the stream to OpenAI format (handles Anthropic, Google, etc.)
+  const normalizedStream = upstreamRes.body.pipeThrough(createNormalizerStream(model));
+
+  return new Response(normalizedStream, {
     status: 200,
     headers: {
       'Content-Type': 'text/event-stream',
