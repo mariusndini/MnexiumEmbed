@@ -1,0 +1,59 @@
+{
+  "name": "@mnexium/chat-react",
+  "version": "1.0.0",
+  "description": "Drop-in React chat widget with AI memory powered by Mnexium",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "react",
+    "chat",
+    "ai",
+    "mnexium",
+    "memory",
+    "llm",
+    "openai",
+    "anthropic",
+    "gemini"
+  ],
+  "author": "Mnexium",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mnexium/chat-react"
+  }
+}
