@@ -11,6 +11,7 @@ export interface MnexiumHandlersConfig {
     recall?: boolean;
     profile?: boolean;
     summarize?: 'light' | 'balanced' | 'aggressive' | false;
+    system_prompt_id?: string;
   };
 }
 

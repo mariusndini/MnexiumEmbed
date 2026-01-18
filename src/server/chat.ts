@@ -11,6 +11,7 @@ export interface ChatOptions {
     recall?: boolean;
     profile?: boolean;
     summarize?: 'light' | 'balanced' | 'aggressive' | false;
+    system_prompt_id?: string;
   };
 }
 
@@ -102,19 +103,26 @@ export async function chatHandler(
   }
 
   // Build request body for Mnexium
+  const mnxPayload: Record<string, unknown> = {
+    subject_id: subjectId,
+    chat_id: chatId,
+    history: mnxOptions.history ?? true,
+    learn: mnxOptions.learn ?? true,
+    recall: mnxOptions.recall ?? true,
+    profile: mnxOptions.profile ?? true,
+    summarize: mnxOptions.summarize ?? 'balanced',
+  };
+
+  // Add system_prompt_id if provided
+  if (mnxOptions.system_prompt_id) {
+    mnxPayload.system_prompt_id = mnxOptions.system_prompt_id;
+  }
+
   const mnexiumBody = {
     model,
     messages: [{ role: 'user', content: message }],
     stream: true,
-    mnx: {
-      subject_id: subjectId,
-      chat_id: chatId,
-      history: mnxOptions.history ?? true,
-      learn: mnxOptions.learn ?? true,
-      recall: mnxOptions.recall ?? true,
-      profile: mnxOptions.profile ?? true,
-      summarize: mnxOptions.summarize ?? 'balanced',
-    },
+    mnx: mnxPayload,
   };
 
   // Forward request to Mnexium

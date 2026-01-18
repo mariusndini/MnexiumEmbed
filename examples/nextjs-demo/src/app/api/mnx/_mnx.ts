@@ -8,6 +8,6 @@ export const mnx = createHandlers({
     learn: true,
     recall: true,
     profile: true,
-    summarize: 'balanced',
+    summarize: 'balanced'
   },
 });

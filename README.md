@@ -167,6 +167,7 @@ const mnx = createHandlers({
 | `mnxOptions.recall` | `boolean` | `true` | Inject relevant memories |
 | `mnxOptions.profile` | `boolean` | `true` | Include user profile |
 | `mnxOptions.summarize` | `'light' \| 'balanced' \| 'aggressive' \| false` | `'balanced'` | Summarization mode |
+| `mnxOptions.system_prompt_id` | `string` | - | Use a saved Mnexium system prompt by ID |
 
 ### Individual Handlers
 

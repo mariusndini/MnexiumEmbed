@@ -68,7 +68,7 @@ export async function bootstrapHandler(
 
   // Generate subject_id if missing
   if (!subjectId) {
-    subjectId = generateUUID();
+    subjectId = `mnx_em_${generateUUID()}`;
     setCookies.push(createCookie(subjectCookieName, subjectId, isSecure));
   }
 
