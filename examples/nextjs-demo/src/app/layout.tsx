@@ -13,6 +13,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           primaryColor="#45b1ebff"
           theme="dark"
           logo="/logo.png"
+ 
+          welcomeIcon="🤖"
+          welcomeMessage="Ask me anything!"
         />
       </body>
     </html>

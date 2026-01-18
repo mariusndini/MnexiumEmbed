@@ -19,6 +19,8 @@ export interface MnexiumChatProps {
   defaultOpen?: boolean;
   logo?: string;
   theme?: 'light' | 'dark';
+  welcomeIcon?: string;
+  welcomeMessage?: string;
 }
 
 const themes = {
@@ -164,6 +166,8 @@ export function MnexiumChat({
   defaultOpen = false,
   logo,
   theme = 'dark',
+  welcomeIcon = '👋',
+  welcomeMessage = 'How can I help you today?',
 }: MnexiumChatProps) {
   const t = themes[theme];
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -332,6 +336,9 @@ export function MnexiumChat({
     } finally {
       setIsLoading(false);
       setIsStreaming(false);
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
     }
   };
 
@@ -457,8 +464,8 @@ export function MnexiumChat({
               {isInitialized && messages.length === 0 && !error && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: t.textMuted, textAlign: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>👋</div>
-                    <div>How can I help you today?</div>
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>{welcomeIcon}</div>
+                    <div>{welcomeMessage}</div>
                   </div>
                 </div>
               )}
