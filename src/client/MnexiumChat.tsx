@@ -282,11 +282,19 @@ export function MnexiumChat({
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chatSize, setChatSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 480);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -489,6 +497,10 @@ export function MnexiumChat({
           from { opacity: 1; transform: translateY(0) scale(1); }
           to { opacity: 0; transform: translateY(10px) scale(0.95); }
         }
+        @keyframes mnx-slide-up {
+          from { opacity: 0; transform: translateY(100%); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes mnx-pulse {
           0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
           50% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
@@ -510,20 +522,26 @@ export function MnexiumChat({
       }}>
         {isOpen && (
           <div style={{
-            position: 'absolute',
-            ...chatPositionStyles,
-            width: chatSize === 'small' ? '320px' : chatSize === 'large' ? '547px' : '380px',
-            height: chatSize === 'small' ? '400px' : chatSize === 'large' ? '600px' : '500px',
-            backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            position: isMobile ? 'fixed' : 'absolute',
+            ...(isMobile ? {
+              left: '8px',
+              right: '8px',
+              bottom: '70px',
+              top: 'auto',
+            } : chatPositionStyles),
+            width: isMobile ? 'calc(100vw - 16px)' : (chatSize === 'small' ? '320px' : chatSize === 'large' ? '547px' : '380px'),
+            height: isMobile ? 'calc(100vh - 90px)' : (chatSize === 'small' ? '400px' : chatSize === 'large' ? '600px' : '500px'),
+            maxHeight: isMobile ? 'calc(100vh - 90px)' : undefined,
+            backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px) saturate(180%)',
             WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            borderRadius: '16px',
+            borderRadius: isMobile ? '16px 16px 16px 16px' : '16px',
             border: `1px solid ${primaryColor}33`,
-            boxShadow: theme === 'dark' ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+            boxShadow: theme === 'dark' ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            animation: 'mnx-fade-in 0.2s ease-out',
+            animation: isMobile ? 'mnx-slide-up 0.3s ease-out' : 'mnx-fade-in 0.2s ease-out',
             transform: 'translateZ(0)',
             isolation: 'isolate',
             transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -580,40 +598,42 @@ export function MnexiumChat({
                     <line x1="5" y1="12" x2="19" y2="12"/>
                   </svg>
                 </button>
-                <button
-                  onClick={() => setChatSize(prev => prev === 'small' ? 'medium' : prev === 'medium' ? 'large' : 'small')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: t.textMuted,
-                    cursor: 'pointer',
-                    padding: '6px',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'transform 0.2s ease',
-                  }}
-                  title={`Size: ${chatSize}`}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    {chatSize === 'small' ? (
-                      <>
-                        <polyline points="15 3 21 3 21 9"/>
-                        <polyline points="9 21 3 21 3 15"/>
-                      </>
-                    ) : chatSize === 'large' ? (
-                      <>
-                        <polyline points="4 14 4 20 10 20"/>
-                        <polyline points="20 10 20 4 14 4"/>
-                      </>
-                    ) : (
-                      <>
-                        <rect x="4" y="4" width="16" height="16" rx="2"/>
-                      </>
-                    )}
-                  </svg>
-                </button>
+                {!isMobile && (
+                  <button
+                    onClick={() => setChatSize(prev => prev === 'small' ? 'medium' : prev === 'medium' ? 'large' : 'small')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: t.textMuted,
+                      cursor: 'pointer',
+                      padding: '6px',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'transform 0.2s ease',
+                    }}
+                    title={`Size: ${chatSize}`}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {chatSize === 'small' ? (
+                        <>
+                          <polyline points="15 3 21 3 21 9"/>
+                          <polyline points="9 21 3 21 3 15"/>
+                        </>
+                      ) : chatSize === 'large' ? (
+                        <>
+                          <polyline points="4 14 4 20 10 20"/>
+                          <polyline points="20 10 20 4 14 4"/>
+                        </>
+                      ) : (
+                        <>
+                          <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        </>
+                      )}
+                    </svg>
+                  </button>
+                )}
                 <button
                   onClick={() => setIsOpen(false)}
                   style={{
@@ -772,17 +792,20 @@ export function MnexiumChat({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '12px 16px',
+            gap: isMobile ? '0' : '8px',
+            padding: isMobile ? '14px' : '12px 16px',
             backgroundColor: primaryColor,
             color: textColor,
             border: 'none',
-            borderRadius: '12px',
+            borderRadius: isMobile ? '50%' : '12px',
             fontSize: '14px',
             fontWeight: 600,
             cursor: 'pointer',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            minWidth: isMobile ? '56px' : undefined,
+            minHeight: isMobile ? '56px' : undefined,
+            justifyContent: 'center',
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'scale(1.05)';
@@ -812,34 +835,36 @@ export function MnexiumChat({
               </svg>
             )}
           </span>
-          <span style={{ 
-            display: 'inline-flex',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            position: 'relative',
-            height: '1.2em',
-            alignItems: 'center',
-          }}>
-            <span style={{
-              display: 'inline-block',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: isOpen ? 'translateY(-100%)' : 'translateY(0)',
-              opacity: isOpen ? 0 : 1,
-              maxWidth: isOpen ? '0' : '300px',
-            }}>
-              {buttonLabel}
-            </span>
-            <span style={{
-              display: 'inline-block',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
-              opacity: isOpen ? 1 : 0,
-              maxWidth: isOpen ? '50px' : '0',
+          {!isMobile && (
+            <span style={{ 
+              display: 'inline-flex',
               overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              position: 'relative',
+              height: '1.2em',
+              alignItems: 'center',
             }}>
-              Close
+              <span style={{
+                display: 'inline-block',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: isOpen ? 'translateY(-100%)' : 'translateY(0)',
+                opacity: isOpen ? 0 : 1,
+                maxWidth: isOpen ? '0' : '300px',
+              }}>
+                {buttonLabel}
+              </span>
+              <span style={{
+                display: 'inline-block',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+                opacity: isOpen ? 1 : 0,
+                maxWidth: isOpen ? '50px' : '0',
+                overflow: 'hidden',
+              }}>
+                Close
+              </span>
             </span>
-          </span>
+          )}
         </button>
       </div>
     </>

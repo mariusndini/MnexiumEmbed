@@ -1,6 +1,6 @@
 {
   "name": "@mnexium/chat-react",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Drop-in React chat widget with AI memory powered by Mnexium",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
