@@ -11,7 +11,7 @@ export interface ChatOptions {
     recall?: boolean;
     profile?: boolean;
     summarize?: 'light' | 'balanced' | 'aggressive' | false;
-    system_prompt_id?: string;
+    system_prompt?: string;
   };
 }
 
@@ -113,9 +113,9 @@ export async function chatHandler(
     summarize: mnxOptions.summarize ?? 'balanced',
   };
 
-  // Add system_prompt_id if provided
-  if (mnxOptions.system_prompt_id) {
-    mnxPayload.system_prompt_id = mnxOptions.system_prompt_id;
+  // Add system_prompt if provided
+  if (mnxOptions.system_prompt) {
+    mnxPayload.system_prompt = mnxOptions.system_prompt;
   }
 
   const mnexiumBody = {
