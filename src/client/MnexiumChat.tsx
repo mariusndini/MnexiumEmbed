@@ -307,6 +307,21 @@ export function MnexiumChat({
     }
   }, [isOpen]);
 
+  // Lock body scroll on mobile when chat is open
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isMobile]);
+
   useEffect(() => {
     if (!eagerInit && !isOpen) return;
     
@@ -501,6 +516,10 @@ export function MnexiumChat({
           from { opacity: 0; transform: translateY(100%); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes mnx-mobile-fade-in {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
         @keyframes mnx-pulse {
           0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
           50% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
@@ -535,7 +554,7 @@ export function MnexiumChat({
             backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px) saturate(180%)',
             WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            borderRadius: isMobile ? '16px 16px 16px 16px' : '16px',
+            borderRadius: '16px',
             border: `1px solid ${primaryColor}33`,
             boxShadow: theme === 'dark' ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
@@ -731,9 +750,9 @@ export function MnexiumChat({
             <div style={{
               display: 'flex',
               gap: '8px',
-              padding: '8px 8px',
+              padding: '8px',
               borderTop: `1px solid ${t.border}`,
-              backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+              backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             }}>
               <input
                 ref={inputRef}
@@ -749,7 +768,7 @@ export function MnexiumChat({
                   backgroundColor: theme === 'dark' ? 'rgba(42, 42, 42, 0.6)' : 'rgba(249, 250, 251, 0.6)',
                   border: 'none',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: t.text,
                   outline: 'none',
                   transition: 'box-shadow 0.15s ease',
@@ -787,6 +806,7 @@ export function MnexiumChat({
           </div>
         )}
 
+        {!(isMobile && isOpen) && (
         <button
           onClick={() => setIsOpen(!isOpen)}
           style={{
@@ -866,6 +886,7 @@ export function MnexiumChat({
             </span>
           )}
         </button>
+        )}
       </div>
     </>
   );
