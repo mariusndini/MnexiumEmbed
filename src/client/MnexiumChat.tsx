@@ -302,10 +302,12 @@ export function MnexiumChat({
   }, [messages, scrollToBottom]);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      inputRef.current?.focus();
+      // Scroll to bottom when chat opens - wait for animation to complete
+      setTimeout(() => scrollToBottom(), 250);
     }
-  }, [isOpen]);
+  }, [isOpen, scrollToBottom]);
 
   // Lock body scroll on mobile when chat is open
   useEffect(() => {
@@ -543,14 +545,14 @@ export function MnexiumChat({
           <div style={{
             position: isMobile ? 'fixed' : 'absolute',
             ...(isMobile ? {
-              left: '8px',
-              right: '8px',
-              bottom: '70px',
-              top: 'auto',
+              left: '12px',
+              right: '12px',
+              top: '24px',
+              bottom: '24px',
             } : chatPositionStyles),
-            width: isMobile ? 'calc(100vw - 16px)' : (chatSize === 'small' ? '320px' : chatSize === 'large' ? '547px' : '380px'),
-            height: isMobile ? 'calc(100vh - 90px)' : (chatSize === 'small' ? '400px' : chatSize === 'large' ? '600px' : '500px'),
-            maxHeight: isMobile ? 'calc(100vh - 90px)' : undefined,
+            width: isMobile ? 'auto' : (chatSize === 'small' ? '320px' : chatSize === 'large' ? '547px' : '380px'),
+            height: isMobile ? 'auto' : (chatSize === 'small' ? '400px' : chatSize === 'large' ? '600px' : '500px'),
+            maxHeight: isMobile ? 'none' : undefined,
             backgroundColor: theme === 'dark' ? 'rgba(26, 26, 26, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px) saturate(180%)',
             WebkitBackdropFilter: 'blur(16px) saturate(180%)',
