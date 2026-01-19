@@ -1,11 +1,12 @@
-# @mnexium/chat-react
+# @mnexium/chat
 
-A drop-in React chat widget that gives any web app a full AI chat experience backed by [Mnexium](https://mnexium.com).
+A drop-in chat widget that gives any web app a full AI chat experience backed by [Mnexium](https://mnexium.com). Works with **React**, **Express**, or **vanilla JavaScript**.
 
 ![Mnexium Chat Demo](img/embed.png)
 
 ## Features
 
+- **Framework Flexible** - React component, Express middleware, or vanilla JS client
 - **Floating Widget** - Modern glassmorphism design with smooth animations
 - **Persistent Memory** - Conversations and user context persist across sessions
 - **Streaming Responses** - Real-time streaming with typing effect
@@ -13,21 +14,29 @@ A drop-in React chat widget that gives any web app a full AI chat experience bac
 - **Markdown Rendering** - Rich formatting for assistant messages
 - **Zero Client-Side Keys** - All API keys stay on your server
 - **Theming** - Light and dark themes with customizable primary color
-- **Eager Initialization** - Pre-loads on page load for instant chat opening
-- **Framework Agnostic** - Works with Next.js, Vite, CRA, and any React app
+- **Mobile Optimized** - Full-screen chat on mobile with body scroll lock
 
 ## Installation
 
 ```bash
-npm install @mnexium/chat-react
+npm install @mnexium/chat
 ```
 
-## Quick Start
+## Package Exports
+
+| Import | Description |
+|--------|-------------|
+| `@mnexium/chat` | React component with full UI |
+| `@mnexium/chat/browser` | Browser bundle (script tag, no build required) |
+| `@mnexium/chat/core` | Vanilla JS client (framework-agnostic) |
+| `@mnexium/chat/server` | Server handlers (Next.js + Express) |
+
+## Quick Start (React + Next.js)
 
 ### 1. Add the Chat Widget
 
 ```tsx
-import { MnexiumChat } from '@mnexium/chat-react';
+import { MnexiumChat } from '@mnexium/chat';
 
 export default function Layout({ children }) {
   return (
@@ -39,16 +48,14 @@ export default function Layout({ children }) {
 }
 ```
 
-This adds a floating "Ask AI" button to the bottom-right of your page. Click it to open the chat.
+This adds a floating "Ask AI" button to the bottom-right of your page.
 
-### 2. Set Up Server Routes (Recommended Pattern)
-
-Create a shared configuration file to avoid repeating options across routes:
+### 2. Set Up Server Routes
 
 **`app/api/mnx/_mnx.ts`**
 
 ```ts
-import { createHandlers } from '@mnexium/chat-react/server';
+import { createHandlers } from '@mnexium/chat/server';
 
 export const mnx = createHandlers({
   model: process.env.MODEL ?? 'gpt-4o-mini',
@@ -62,8 +69,6 @@ export const mnx = createHandlers({
   },
 });
 ```
-
-Then create simple route files:
 
 **`app/api/mnx/bootstrap/route.ts`**
 
@@ -79,21 +84,14 @@ import { mnx } from '../_mnx';
 export const POST = mnx.chat;
 ```
 
-**`app/api/mnx/new-chat/route.ts`** (optional)
+**`app/api/mnx/new-chat/route.ts`**
 
 ```ts
 import { mnx } from '../_mnx';
 export const POST = mnx.newChat;
 ```
 
-**`app/api/mnx/history/route.ts`** (optional)
-
-```ts
-import { mnx } from '../_mnx';
-export const GET = mnx.history;
-```
-
-**`app/api/mnx/conversations/[chatId]/route.ts`** (optional)
+**`app/api/mnx/conversations/[chatId]/route.ts`**
 
 ```ts
 import { mnx } from '../../_mnx';
@@ -121,6 +119,100 @@ GOOGLE_API_KEY=...
 # MODEL=gpt-4o-mini
 # MODEL=claude-3-haiku-20240307
 # MODEL=gemini-2.0-flash-lite
+```
+
+---
+
+## Plain HTML (No Build Required)
+
+For non-React apps, use the browser bundle with a simple script tag. **Same UI as React!**
+
+### 1. Set Up Express Server
+
+```javascript
+import express from 'express';
+import { mountMnexiumRoutes } from '@mnexium/chat/server';
+
+const app = express();
+app.use(express.json());
+app.use(express.static('public'));
+
+// Serve the browser bundle
+app.get('/mnexium-chat.js', (req, res) => {
+  res.sendFile(require.resolve('@mnexium/chat/browser'));
+});
+
+// Mount Mnexium API routes
+mountMnexiumRoutes(app, '/api/mnx');
+
+app.listen(3000);
+```
+
+### 2. Add Script Tag to HTML
+
+```html
+<!-- Just add this script tag! -->
+<script 
+  src="/mnexium-chat.js"
+  data-endpoint="/api/mnx"
+  data-title="Ask AI"
+  data-button-label="Ask AI"
+  data-theme="dark"
+  data-history="true"
+></script>
+```
+
+That's it! The floating chat button appears automatically.
+
+### Script Data Attributes
+
+| Attribute | Description |
+|-----------|-------------|
+| `data-endpoint` | API endpoint (default: `/api/mnx`) |
+| `data-title` | Chat window title |
+| `data-button-label` | Floating button label |
+| `data-position` | `bottom-right` or `bottom-left` |
+| `data-primary-color` | Accent color (hex) |
+| `data-text-color` | Button text color |
+| `data-theme` | `light` or `dark` |
+| `data-logo` | Logo image URL |
+| `data-welcome-icon` | Welcome emoji |
+| `data-welcome-message` | Welcome text |
+| `data-default-open` | `true` to start open |
+| `data-history` | `true` to load history |
+| `data-eager-init` | `false` to delay init |
+
+### Programmatic Usage
+
+```html
+<script src="/mnexium-chat.js" data-auto-init="false"></script>
+<script>
+  // Render manually with options
+  MnexiumChat.render({
+    endpoint: '/api/mnx',
+    title: 'Support',
+    primaryColor: '#45b1eb',
+    theme: 'dark',
+  });
+</script>
+```
+
+---
+
+## Vanilla JS Client (Build Your Own UI)
+
+For custom UIs, use the core client directly:
+
+```javascript
+import { MnexiumClient } from '@mnexium/chat/core';
+
+const chat = new MnexiumClient({ endpoint: '/api/mnx', history: true });
+
+chat.onMessage((messages) => renderMessages(messages));
+chat.onStateChange((state) => updateUI(state));
+
+await chat.init();
+await chat.send('Hello!');
 ```
 
 ## Component Props
@@ -174,7 +266,25 @@ const mnx = createHandlers({
 You can also import handlers individually:
 
 ```ts
-import { bootstrapHandler, chatHandler, newChatHandler, historyHandler, conversationHandler } from '@mnexium/chat-react/server';
+import { bootstrapHandler, chatHandler, newChatHandler, historyHandler, conversationHandler } from '@mnexium/chat/server';
+```
+
+### Express Middleware
+
+For Express apps, use `createExpressMiddleware` or `mountMnexiumRoutes`:
+
+```ts
+import { createExpressMiddleware, mountMnexiumRoutes } from '@mnexium/chat/server';
+
+// Option 1: Mount all routes at once
+mountMnexiumRoutes(app, '/api/mnx');
+
+// Option 2: Use individual middleware handlers
+const mnx = createExpressMiddleware({ cookiePrefix: 'mnx' });
+app.get('/api/mnx/bootstrap', mnx.bootstrap);
+app.post('/api/mnx/chat', mnx.chat);
+app.post('/api/mnx/new-chat', mnx.newChat);
+app.get('/api/mnx/conversations/:chatId', mnx.conversation);
 ```
 
 ## Supported Models
@@ -209,8 +319,6 @@ app/
 │       │   └── route.ts
 │       ├── new-chat/
 │       │   └── route.ts
-│       ├── history/
-│       │   └── route.ts
 │       └── conversations/
 │           └── [chatId]/
 │               └── route.ts
@@ -220,7 +328,7 @@ app/
 **`app/layout.tsx`**
 
 ```tsx
-import { MnexiumChat } from '@mnexium/chat-react';
+import { MnexiumChat } from '@mnexium/chat';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -246,7 +354,71 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-The widget appears as a floating button on every page. Click to open the chat with smooth animations.
+## Full Express Example
+
+```
+project/
+├── server.js
+├── public/
+│   └── index.html
+├── package.json
+└── .env
+```
+
+**`server.js`**
+
+```javascript
+import 'dotenv/config';
+import express from 'express';
+import { createRequire } from 'module';
+import { mountMnexiumRoutes } from '@mnexium/chat/server';
+
+const require = createRequire(import.meta.url);
+
+const app = express();
+app.use(express.json());
+app.use(express.static('public'));
+
+// Serve the browser bundle
+app.get('/mnexium-chat.js', (req, res) => {
+  res.sendFile(require.resolve('@mnexium/chat/browser'));
+});
+
+// Mount API routes
+mountMnexiumRoutes(app, '/api/mnx');
+
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+```
+
+**`public/index.html`**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My App</title>
+</head>
+<body>
+  <h1>Welcome</h1>
+  
+  <!-- Mnexium Chat Widget -->
+  <script 
+    src="/mnexium-chat.js"
+    data-endpoint="/api/mnx"
+    data-theme="dark"
+  ></script>
+</body>
+</html>
+```
+
+**`.env`**
+
+```bash
+MNX_API_KEY=mnx_live_...
+OPENAI_API_KEY=sk-...
+```
+
+See `examples/express-demo` for a complete working example.
 
 ## License
 

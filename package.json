@@ -1,7 +1,7 @@
 {
-  "name": "@mnexium/chat-react",
-  "version": "1.0.8",
-  "description": "Drop-in React chat widget with AI memory powered by Mnexium",
+  "name": "@mnexium/chat",
+  "version": "2.0.0",
+  "description": "Drop-in chat widget with AI memory powered by Mnexium - works with React, Express, or vanilla JS",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -10,6 +10,12 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./browser": "./dist/browser/browser.global.js",
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js"
     },
     "./server": {
       "types": "./dist/server/index.d.ts",
@@ -30,6 +36,14 @@
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
@@ -41,6 +55,8 @@
   },
   "keywords": [
     "react",
+    "express",
+    "vanilla",
     "chat",
     "chatbot",
     "ai",
