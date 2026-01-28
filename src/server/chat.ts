@@ -79,7 +79,7 @@ export async function chatHandler(
   }
 
   // Get API keys from environment
-  const mnxApiKey = process.env.MNX_API_KEY;
+  const mnxApiKey = process.env.MNX_API_KEY?.trim();
   if (!mnxApiKey) {
     console.error('[Mnexium] MNX_API_KEY is not set. Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(

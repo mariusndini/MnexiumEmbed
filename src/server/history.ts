@@ -31,7 +31,7 @@ export async function historyHandler(
     );
   }
 
-  const apiKey = process.env.MNX_API_KEY;
+  const apiKey = process.env.MNX_API_KEY?.trim();
   if (!apiKey) {
     console.error('[Mnexium] MNX_API_KEY is not set. Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(
@@ -101,7 +101,7 @@ export async function conversationHandler(
     );
   }
 
-  const apiKey = process.env.MNX_API_KEY;
+  const apiKey = process.env.MNX_API_KEY?.trim();
   if (!apiKey) {
     console.error('[Mnexium] MNX_API_KEY is not set.Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(

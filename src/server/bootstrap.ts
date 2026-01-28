@@ -75,12 +75,16 @@ export async function bootstrapHandler(
 
   // Get or generate chat_id
   if (!chatId) {
-    const apiKey = process.env.MNX_API_KEY;
-    
+    const apiKey = process.env.MNX_API_KEY?.trim();
+
     if (!apiKey) {
-      console.error('[Mnexium] MNX_API_KEY is not set. Chat history lookup skipped.');
+      console.error('[Mnexium] MNX_API_KEY is not set. Please visit https://mnexium.com/docs#quickstart to get your API key.');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error: Missing MNX_API_KEY' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
-    
+
     if (apiKey) {
       try {
         // Try to get existing chat history
