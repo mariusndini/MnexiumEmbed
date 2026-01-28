@@ -244,6 +244,7 @@ Creates all handlers with shared configuration:
 const mnx = createHandlers({
   model: 'gpt-4o-mini',
   cookiePrefix: 'mnx',
+  chatPrefix: '_landing',  // Optional: creates separate chat sessions
   mnxOptions: { ... },
 });
 
@@ -254,6 +255,7 @@ const mnx = createHandlers({
 |--------|------|---------|-------------|
 | `model` | `string` | `'gpt-4o-mini'` | LLM model to use |
 | `cookiePrefix` | `string` | `'mnx'` | Prefix for session cookies |
+| `chatPrefix` | `string` | - | Optional suffix appended to `cookiePrefix` for the chat cookie (e.g., `cookiePrefix: 'mnx'` + `chatPrefix: '_landing'` → cookie name `mnx_landing_chat`) |
 | `mnxOptions.history` | `boolean` | `true` | Enable conversation history |
 | `mnxOptions.learn` | `boolean \| 'force'` | `true` | Extract and store memories |
 | `mnxOptions.recall` | `boolean` | `true` | Inject relevant memories |

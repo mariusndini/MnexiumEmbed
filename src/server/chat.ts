@@ -5,6 +5,7 @@ const MNEXIUM_API_BASE = 'https://www.mnexium.com/api/v1';
 export interface ChatOptions {
   model?: string;
   cookiePrefix?: string;
+  chatPrefix?: string;
   mnxOptions?: {
     history?: boolean;
     learn?: boolean | 'force';
@@ -31,6 +32,7 @@ export async function chatHandler(
   const {
     model = 'gpt-4o-mini',
     cookiePrefix = 'mnx',
+    chatPrefix,
     mnxOptions = {
       history: true,
       learn: true,
@@ -41,7 +43,7 @@ export async function chatHandler(
   } = options;
 
   const subjectCookieName = `${cookiePrefix}_subject`;
-  const chatCookieName = `${cookiePrefix}_chat`;
+  const chatCookieName = chatPrefix ? `${cookiePrefix}${chatPrefix}_chat` : `${cookiePrefix}_chat`;
 
   // Parse cookies
   const cookieHeader = req.headers.get('cookie');
@@ -79,6 +81,7 @@ export async function chatHandler(
   // Get API keys from environment
   const mnxApiKey = process.env.MNX_API_KEY;
   if (!mnxApiKey) {
+    console.error('[Mnexium] MNX_API_KEY is not set. Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(
       JSON.stringify({ error: 'Server configuration error: Missing MNX_API_KEY' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -87,7 +90,7 @@ export async function chatHandler(
 
   // Build headers for Mnexium API
   const headers: HeadersInit = {
-    'Authorization': `Bearer ${mnxApiKey}`,
+    'x-mnexium-key': `${mnxApiKey}`,
     'Content-Type': 'application/json',
   };
 

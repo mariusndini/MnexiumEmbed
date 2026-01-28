@@ -8,6 +8,7 @@ export interface BootstrapResponse {
 
 export interface BootstrapOptions {
   cookiePrefix?: string;
+  chatPrefix?: string;
 }
 
 function generateUUID(): string {
@@ -52,9 +53,9 @@ export async function bootstrapHandler(
   req: Request,
   options: BootstrapOptions = {}
 ): Promise<Response> {
-  const { cookiePrefix = 'mnx' } = options;
+  const { cookiePrefix = 'mnx', chatPrefix } = options;
   const subjectCookieName = `${cookiePrefix}_subject`;
-  const chatCookieName = `${cookiePrefix}_chat`;
+  const chatCookieName = chatPrefix ? `${cookiePrefix}${chatPrefix}_chat` : `${cookiePrefix}_chat`;
 
   const cookieHeader = req.headers.get('cookie');
   const cookies = parseCookies(cookieHeader);
@@ -76,12 +77,16 @@ export async function bootstrapHandler(
   if (!chatId) {
     const apiKey = process.env.MNX_API_KEY;
     
+    if (!apiKey) {
+      console.error('[Mnexium] MNX_API_KEY is not set. Chat history lookup skipped.');
+    }
+    
     if (apiKey) {
       try {
         // Try to get existing chat history
         const historyRes = await fetch(`${MNEXIUM_API_BASE}/history/${subjectId}`, {
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'x-mnexium-key': `${apiKey}`,
           },
         });
 
@@ -128,9 +133,9 @@ export async function newChatHandler(
   req: Request,
   options: BootstrapOptions = {}
 ): Promise<Response> {
-  const { cookiePrefix = 'mnx' } = options;
+  const { cookiePrefix = 'mnx', chatPrefix } = options;
   const subjectCookieName = `${cookiePrefix}_subject`;
-  const chatCookieName = `${cookiePrefix}_chat`;
+  const chatCookieName = chatPrefix ? `${cookiePrefix}${chatPrefix}_chat` : `${cookiePrefix}_chat`;
 
   const cookieHeader = req.headers.get('cookie');
   const cookies = parseCookies(cookieHeader);

@@ -5,6 +5,7 @@ import { historyHandler, conversationHandler, type HistoryOptions, type Conversa
 export interface MnexiumHandlersConfig {
   model?: string;
   cookiePrefix?: string;
+  chatPrefix?: string;
   mnxOptions?: {
     history?: boolean;
     learn?: boolean | 'force';
@@ -48,10 +49,10 @@ export interface MnexiumHandlers {
  * ```
  */
 export function createHandlers(config: MnexiumHandlersConfig = {}): MnexiumHandlers {
-  const { model, cookiePrefix, mnxOptions } = config;
+  const { model, cookiePrefix, chatPrefix, mnxOptions } = config;
 
-  const bootstrapOpts: BootstrapOptions = { cookiePrefix };
-  const chatOpts: ChatOptions = { model, cookiePrefix, mnxOptions };
+  const bootstrapOpts: BootstrapOptions = { cookiePrefix, chatPrefix };
+  const chatOpts: ChatOptions = { model, cookiePrefix, chatPrefix, mnxOptions };
   const historyOpts: HistoryOptions = { cookiePrefix };
   const conversationOpts: ConversationOptions = { cookiePrefix };
 

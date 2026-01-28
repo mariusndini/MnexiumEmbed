@@ -33,6 +33,7 @@ export async function historyHandler(
 
   const apiKey = process.env.MNX_API_KEY;
   if (!apiKey) {
+    console.error('[Mnexium] MNX_API_KEY is not set. Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(
       JSON.stringify({ error: 'Server configuration error: Missing MNX_API_KEY' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -42,7 +43,7 @@ export async function historyHandler(
   try {
     const res = await fetch(`${MNEXIUM_API_BASE}/history/${subjectId}`, {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'x-mnexium-key': `${apiKey}`,
       },
     });
 
@@ -102,6 +103,7 @@ export async function conversationHandler(
 
   const apiKey = process.env.MNX_API_KEY;
   if (!apiKey) {
+    console.error('[Mnexium] MNX_API_KEY is not set.Please visit https://mnexium.com/docs#quickstart to get your API key.');
     return new Response(
       JSON.stringify({ error: 'Server configuration error: Missing MNX_API_KEY' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -112,7 +114,7 @@ export async function conversationHandler(
     const url = `${MNEXIUM_API_BASE}/chat/history/read?chat_id=${chatId}&subject_id=${subjectId}&limit=200`;
     const res = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'x-mnexium-key': `${apiKey}`,
       },
     });
 
