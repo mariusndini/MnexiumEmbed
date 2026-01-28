@@ -1,4 +1,4 @@
-import { MnexiumChat } from '@mnexium/chat-react';
+import { MnexiumChat } from '@mnexium/chat';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

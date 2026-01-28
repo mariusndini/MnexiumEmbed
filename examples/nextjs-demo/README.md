@@ -1,6 +1,6 @@
 # Next.js Demo
 
-Minimal example of `@mnexium/chat-react` in a Next.js App Router project.
+Minimal example of `@mnexium/chat` in a Next.js App Router project.
 
 ## Setup
 
@@ -37,7 +37,7 @@ src/app/
 
 **layout.tsx** - Add the widget to your layout:
 ```tsx
-import { MnexiumChat } from '@mnexium/chat-react';
+import { MnexiumChat } from '@mnexium/chat';
 
 export default function RootLayout({ children }) {
   return (
@@ -53,7 +53,7 @@ export default function RootLayout({ children }) {
 
 **api/mnx/bootstrap/route.ts** - Bootstrap endpoint:
 ```ts
-import { bootstrapHandler } from '@mnexium/chat-react/server';
+import { bootstrapHandler } from '@mnexium/chat/server';
 
 export async function GET(req: Request) {
   return bootstrapHandler(req);
@@ -62,7 +62,7 @@ export async function GET(req: Request) {
 
 **api/mnx/chat/route.ts** - Chat endpoint:
 ```ts
-import { chatHandler } from '@mnexium/chat-react/server';
+import { chatHandler } from '@mnexium/chat/server';
 
 export async function POST(req: Request) {
   return chatHandler(req);
